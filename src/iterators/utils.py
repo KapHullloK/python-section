@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 from itertools import batched
-from typing import Iterable, TypeAlias
+from typing import Iterable, TypeAlias, Iterator
 
 SomeRemoteData: TypeAlias = int
 
@@ -29,8 +29,45 @@ def request(query: Query) -> Page:
 
 
 class RetrieveRemoteData:
-    pass
+    def __init__(self, per_page: int):
+        self.per_page = per_page
+        self.page = 1
+
+    def __iter__(self) -> Iterator[SomeRemoteData]:
+        while True:
+            response = request(
+                Query(per_page=self.per_page, page=self.page)
+            )
+
+            for item in response.results:
+                yield item
+
+            if response.next is None:
+                break
+
+            self.page = response.next
 
 
 class Fibo:
-    pass
+    def __init__(self, n: int):
+        self.n = n
+
+    def __iter__(self) -> 'Fibo':
+        self.prev, self.cur = 0, 1
+        self.position = 0
+        return self
+
+    def __next__(self) -> int:
+        if self.position >= self.n:
+            raise StopIteration
+
+        self.position += 1
+
+        if self.position == 1:
+            return self.prev
+        elif self.position == 2:
+            return self.cur
+        else:
+            self.prev, new_cur = self.cur, self.cur + self.prev
+            self.cur = new_cur
+            return self.cur

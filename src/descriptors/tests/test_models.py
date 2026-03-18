@@ -26,6 +26,7 @@ class TestModel:
         [("name", "model-name"), ("slug", "model-slug"), ("href", None)],
     )
     def test_get(self, model, field_name, field_value):
+        print(model, field_name, field_value)
         assert getattr(model, field_name) == field_value
 
     def test_set__exists(self, model):
